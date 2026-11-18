@@ -32,8 +32,31 @@
     margin: 0 auto;
     -webkit-font-smoothing: antialiased;
   }
-  header { text-align: center; padding: 8px 0 20px; }
-  header img { height: 52px; display: block; margin: 0 auto 10px; }
+  header { text-align: center; padding: 8px 0 20px; position: relative; }
+  .lang-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+    box-shadow: var(--shadow);
+  }
+  .lang-bar button {
+    padding: 4px 10px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .lang-bar button.active { background: var(--accent); color: #fff; }
+  header img { height: 52px; display: block; margin: 10px auto 10px; }
   header h1 { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.02em; }
   header p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
 
@@ -256,26 +279,30 @@
 <body>
 
 <header>
+  <div class="lang-bar" role="group" aria-label="Language">
+    <button type="button" id="lang-en" class="active">EN</button>
+    <button type="button" id="lang-bm">BM</button>
+  </div>
   <img src="logo-tmg.webp" alt="TMG Group logo">
-  <h1>Weekly Cash Flow View</h1>
-  <p>A simple weekly money view with a one-month forecast</p>
+  <h1 data-i18n="appTitle">Weekly Cash Flow View</h1>
+  <p data-i18n="appTagline">A simple weekly money view with a one-month forecast</p>
 </header>
 
 <!-- Section 3: Quick totals (placed first so the big picture is up top) -->
 <section id="totals-section" aria-label="Quick totals">
-  <h2>Quick Totals</h2>
-  <p class="purpose">The current overall picture — is cash up or down?</p>
+  <h2 data-i18n="totalsTitle">Quick Totals</h2>
+  <p class="purpose" data-i18n="totalsPurpose">The current overall picture — is cash up or down?</p>
   <div class="totals-row">
     <div>
-      <span class="totals-label">Total In</span>
+      <span class="totals-label" data-i18n="totalIn">Total In</span>
       <div class="totals-value up" id="total-in">RM 0.00</div>
     </div>
     <div>
-      <span class="totals-label">Total Out</span>
+      <span class="totals-label" data-i18n="totalOut">Total Out</span>
       <div class="totals-value down" id="total-out">RM 0.00</div>
     </div>
     <div class="net-cell">
-      <span class="totals-label">Net</span>
+      <span class="totals-label" data-i18n="net">Net</span>
       <div class="totals-value" id="total-net">RM 0.00</div>
     </div>
   </div>
@@ -283,21 +310,21 @@
 
 <!-- Section 1: Weekly cash flow -->
 <section id="weekly-section" aria-label="Weekly cash flow">
-  <h2>Weekly Cash Flow</h2>
-  <p class="purpose">Money in and money out for each week, at a glance</p>
+  <h2 data-i18n="weeklyTitle">Weekly Cash Flow</h2>
+  <p class="purpose" data-i18n="weeklyPurpose">Money in and money out for each week, at a glance</p>
 
   <div class="filter-bar" role="group" aria-label="Filter view">
-    <button data-filter="all" class="active">All</button>
-    <button data-filter="in">Money In</button>
-    <button data-filter="out">Money Out</button>
+    <button data-filter="all" class="active" data-i18n="filterAll">All</button>
+    <button data-filter="in" data-i18n="filterIn">Money In</button>
+    <button data-filter="out" data-i18n="filterOut">Money Out</button>
   </div>
 
   <div id="week-cards"></div>
 
   <div class="chart-wrap">
     <div class="chart-legend">
-      <span><span class="dot dot-in"></span>Money In</span>
-      <span><span class="dot dot-out"></span>Money Out</span>
+      <span><span class="dot dot-in"></span><span data-i18n="moneyIn">Money In</span></span>
+      <span><span class="dot dot-out"></span><span data-i18n="moneyOut">Money Out</span></span>
     </div>
     <div id="chart" aria-label="Weekly cash flow chart" role="img"></div>
   </div>
@@ -305,32 +332,32 @@
   <form id="entry-form" novalidate>
     <div class="row">
       <select id="type">
-        <option value="in">Money In</option>
-        <option value="out">Money Out</option>
+        <option value="in" data-i18n="moneyIn">Money In</option>
+        <option value="out" data-i18n="moneyOut">Money Out</option>
       </select>
       <select id="week">
-        <option value="1">Week 1</option>
-        <option value="2">Week 2</option>
-        <option value="3">Week 3</option>
-        <option value="4">Week 4</option>
+        <option value="1" data-i18n="week1">Week 1</option>
+        <option value="2" data-i18n="week2">Week 2</option>
+        <option value="3" data-i18n="week3">Week 3</option>
+        <option value="4" data-i18n="week4">Week 4</option>
       </select>
     </div>
     <div class="row">
-      <input type="text" id="label" placeholder="What is it? e.g. Salary, Groceries" maxlength="40">
-      <input type="number" id="amount" placeholder="Amount (RM)" min="0.01" step="0.01">
+      <input type="text" id="label" data-i18n-placeholder="labelPlaceholder" placeholder="What is it? e.g. Salary, Groceries" maxlength="40">
+      <input type="number" id="amount" data-i18n-placeholder="amountPlaceholder" placeholder="Amount (RM)" min="0.01" step="0.01">
     </div>
-    <button type="submit">Add Entry</button>
+    <button type="submit" data-i18n="addEntry">Add Entry</button>
     <div class="form-msg" id="form-msg"></div>
   </form>
 </section>
 
 <!-- Section 2: Next-month forecast -->
 <section id="forecast-section" aria-label="Next-month forecast">
-  <h2>Next-Month Forecast</h2>
-  <p class="purpose">A simple look ahead for the next 4 weeks</p>
+  <h2 data-i18n="forecastTitle">Next-Month Forecast</h2>
+  <p class="purpose" data-i18n="forecastPurpose">A simple look ahead for the next 4 weeks</p>
   <div id="forecast-cards"></div>
   <div class="forecast-note" id="forecast-note"></div>
-  <button type="button" id="export-pdf" style="margin-top:12px; width:100%; padding:10px; background:#2d3748; color:#fff; border:none; border-radius:8px; font-size:0.95rem; font-weight:600; cursor:pointer;">
+  <button type="button" id="export-pdf" data-i18n="exportPdf" style="margin-top:12px; width:100%; padding:10px; background:#2d3748; color:#fff; border:none; border-radius:8px; font-size:0.95rem; font-weight:600; cursor:pointer;">
     Export Forecast to PDF
   </button>
 </section>
@@ -338,15 +365,15 @@
 <!-- Printable forecast sheet (hidden on screen, shown only when printing) -->
 <div id="print-sheet" style="display:none;">
   <img src="logo-tmg.webp" alt="TMG logo" style="height:44px; margin-bottom:12px;">
-  <h1 style="font-size:1.3rem;">Next-Month Forecast</h1>
+  <h1 style="font-size:1.3rem;" data-i18n="forecastTitle">Next-Month Forecast</h1>
   <p id="print-generated" style="color:#555; font-size:0.85rem; margin-bottom:12px;"></p>
   <table style="width:100%; border-collapse:collapse; font-size:0.9rem;" id="print-table">
     <thead>
       <tr style="background:#f0f0f0;">
-        <th style="text-align:left; padding:8px; border:1px solid #ccc;">Week</th>
-        <th style="text-align:right; padding:8px; border:1px solid #ccc;">Money In</th>
-        <th style="text-align:right; padding:8px; border:1px solid #ccc;">Money Out</th>
-        <th style="text-align:right; padding:8px; border:1px solid #ccc;">Net</th>
+        <th style="text-align:left; padding:8px; border:1px solid #ccc;" data-i18n="week">Week</th>
+        <th style="text-align:right; padding:8px; border:1px solid #ccc;" data-i18n="moneyIn">Money In</th>
+        <th style="text-align:right; padding:8px; border:1px solid #ccc;" data-i18n="moneyOut">Money Out</th>
+        <th style="text-align:right; padding:8px; border:1px solid #ccc;" data-i18n="net">Net</th>
       </tr>
     </thead>
     <tbody id="print-body"></tbody>
@@ -355,7 +382,7 @@
   <p id="print-note" style="margin-top:12px; font-size:0.85rem; color:#444;"></p>
 </div>
 
-<footer>Sample data only — nothing is saved between visits.</footer>
+<footer data-i18n="footerNote">Sample data only — nothing is saved between visits.</footer>
 
 <script>
 (function () {
@@ -370,9 +397,99 @@
   ];
   var nextId = 5;
   var filter = "all";
+  var lang = "en";
+
+  // ---- Translations (English / Bahasa Melayu) ----
+  var I18N = {
+    en: {
+      appTitle: "Weekly Cash Flow View",
+      appTagline: "A simple weekly money view with a one-month forecast",
+      totalsTitle: "Quick Totals",
+      totalsPurpose: "The current overall picture — is cash up or down?",
+      totalIn: "Total In", totalOut: "Total Out", net: "Net",
+      weeklyTitle: "Weekly Cash Flow",
+      weeklyPurpose: "Money in and money out for each week, at a glance",
+      filterAll: "All", filterIn: "Money In", filterOut: "Money Out",
+      moneyIn: "Money In", moneyOut: "Money Out",
+      moneyInShort: "In", moneyOutShort: "Out",
+      week: "Week", week1: "Week 1", week2: "Week 2", week3: "Week 3", week4: "Week 4",
+      labelPlaceholder: "What is it? e.g. Salary, Groceries",
+      amountPlaceholder: "Amount (RM)",
+      addEntry: "Add Entry",
+      errLabel: "Please give the entry a short name.",
+      errAmount: "Please enter an amount above zero.",
+      emptyWeek: "No matching entries this week.",
+      forecastTitle: "Next-Month Forecast",
+      forecastPurpose: "A simple look ahead for the next 4 weeks",
+      exportPdf: "Export Forecast to PDF",
+      footerNote: "Sample data only — nothing is saved between visits.",
+      removeEntry: "Remove entry",
+      forecastNote: function (t, fmt, pos) {
+        return "Based on your current 4 weeks, the next month projects roughly " +
+          fmt(t.in) + " in and " + fmt(t.out) + " out, for a net of " +
+          (t.net >= 0 ? "+" : "") + fmt(t.net) + ". " +
+          (pos ? "Cash trend is up." : "Cash trend is down — worth a closer look.");
+      },
+      printGenerated: function (dateStr) {
+        return "Generated " + dateStr + " · Weekly Cash Flow View (sample data)";
+      },
+      printTotal: "Next-month total",
+      locale: "en-MY"
+    },
+    bm: {
+      appTitle: "Pandangan Aliran Tunai Mingguan",
+      appTagline: "Pandangan wang mingguan yang mudah dengan unjuran sebulan",
+      totalsTitle: "Jumlah Pantas",
+      totalsPurpose: "Gambaran keseluruhan semasa — adakah tunai naik atau turun?",
+      totalIn: "Jumlah Masuk", totalOut: "Jumlah Keluar", net: "Bersih",
+      weeklyTitle: "Aliran Tunai Mingguan",
+      weeklyPurpose: "Wang masuk dan keluar setiap minggu, sekali pandang",
+      filterAll: "Semua", filterIn: "Wang Masuk", filterOut: "Wang Keluar",
+      moneyIn: "Wang Masuk", moneyOut: "Wang Keluar",
+      moneyInShort: "Masuk", moneyOutShort: "Keluar",
+      week: "Minggu", week1: "Minggu 1", week2: "Minggu 2", week3: "Minggu 3", week4: "Minggu 4",
+      labelPlaceholder: "Apa itu? cth. Gaji, Groser",
+      amountPlaceholder: "Jumlah (RM)",
+      addEntry: "Tambah Catatan",
+      errLabel: "Sila beri catatan nama ringkas.",
+      errAmount: "Sila masukkan jumlah melebihi sifar.",
+      emptyWeek: "Tiada catatan sepadan pada minggu ini.",
+      forecastTitle: "Unjuran Bulan Hadapan",
+      forecastPurpose: "Pandangan mudah untuk 4 minggu hadapan",
+      exportPdf: "Eksport Unjuran ke PDF",
+      footerNote: "Data contoh sahaja — tiada apa-apa disimpan antara lawatan.",
+      removeEntry: "Buang catatan",
+      forecastNote: function (t, fmt, pos) {
+        return "Berdasarkan 4 minggu semasa anda, bulan hadapan diunjur lebih kurang " +
+          fmt(t.in) + " masuk dan " + fmt(t.out) + " keluar, dengan bersih " +
+          (t.net >= 0 ? "+" : "") + fmt(t.net) + ". " +
+          (pos ? "Trend tunai menaik." : "Trend tunai menurun — patut dilihat dengan lebih teliti.");
+      },
+      printGenerated: function (dateStr) {
+        return "Dijana " + dateStr + " · Pandangan Aliran Tunai Mingguan (data contoh)";
+      },
+      printTotal: "Jumlah bulan hadapan",
+      locale: "ms-MY"
+    }
+  };
+
+  function tr(key) { return I18N[lang][key]; }
+
+  function applyStaticLang() {
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      var v = I18N[lang][el.getAttribute("data-i18n")];
+      if (typeof v === "string") el.textContent = v;
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+      el.setAttribute("placeholder", tr(el.getAttribute("data-i18n-placeholder")));
+    });
+    document.documentElement.lang = lang === "bm" ? "ms" : "en";
+    document.getElementById("lang-en").classList.toggle("active", lang === "en");
+    document.getElementById("lang-bm").classList.toggle("active", lang === "bm");
+  }
 
   var fmt = function (n) {
-    return "RM " + n.toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return "RM " + n.toLocaleString(I18N[lang].locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   // ---- Derived numbers ----
@@ -400,7 +517,7 @@
     var avgIn = t.in / 4, avgOut = t.out / 4;
     var rows = [];
     for (var i = 1; i <= 4; i++) {
-      rows.push({ week: "Week " + i, in: avgIn, out: avgOut, net: avgIn - avgOut });
+      rows.push({ week: tr("week") + " " + i, in: avgIn, out: avgOut, net: avgIn - avgOut });
     }
     return rows;
   }
@@ -430,22 +547,22 @@
       });
       var rows = visible.map(function (e) {
         return '<div class="entry">' +
-          '<span class="tag ' + e.type + '">' + (e.type === "in" ? "In" : "Out") + '</span>' +
+          '<span class="tag ' + e.type + '">' + (e.type === "in" ? tr("moneyInShort") : tr("moneyOutShort")) + '</span>' +
           '<span style="flex:1">' + esc(e.label) + '</span>' +
           '<span class="amount ' + e.type + '">' + (e.type === "in" ? "+" : "−") + " " + fmt(e.amount) + '</span>' +
-          '<button class="remove" data-del="' + e.id + '" aria-label="Remove entry">✕</button>' +
+          '<button class="remove" data-del="' + e.id + '" aria-label="' + tr("removeEntry") + '">✕</button>' +
           '</div>';
       }).join("");
       if (!rows) {
-        rows = '<div class="empty-note">No matching entries this week.</div>';
+        rows = '<div class="empty-note">' + tr("emptyWeek") + '</div>';
       }
       html += '<div class="week-card">' +
-        '<div class="week-title"><span>Week ' + w + '</span>' +
+        '<div class="week-title"><span>' + tr("week") + ' ' + w + '</span>' +
         '<span class="week-net-badge ' + (wt.net >= 0 ? "pos" : "neg") + '">' + (wt.net >= 0 ? "+" : "") + fmt(wt.net) + '</span></div>' +
         '<div class="week-nums">' +
-        '<span><span class="num-label">In</span>' + fmt(wt.in) + '</span>' +
-        '<span><span class="num-label">Out</span>' + fmt(wt.out) + '</span>' +
-        '<span><span class="num-label">Net</span>' + (wt.net >= 0 ? "+" : "") + fmt(wt.net) + '</span>' +
+        '<span><span class="num-label">' + tr("moneyInShort") + '</span>' + fmt(wt.in) + '</span>' +
+        '<span><span class="num-label">' + tr("moneyOutShort") + '</span>' + fmt(wt.out) + '</span>' +
+        '<span><span class="num-label">' + tr("net") + '</span>' + (wt.net >= 0 ? "+" : "") + fmt(wt.net) + '</span>' +
         '</div><div class="entry-list">' + rows + '</div></div>';
     }
     elWeekCards.innerHTML = html;
@@ -454,16 +571,13 @@
     var rows2 = forecast(entries).map(function (r) {
       return '<div class="entry">' +
         '<span style="flex:1;font-weight:600">' + r.week + '</span>' +
-        '<span class="amount in">In ' + fmt(r.in) + '</span>' +
-        '<span class="amount out">Out ' + fmt(r.out) + '</span>' +
-        '<span class="amount ' + (r.net >= 0 ? "in" : "out") + '">Net ' + (r.net >= 0 ? "+" : "") + fmt(r.net) + '</span>' +
+        '<span class="amount in">' + tr("moneyInShort") + ' ' + fmt(r.in) + '</span>' +
+        '<span class="amount out">' + tr("moneyOutShort") + ' ' + fmt(r.out) + '</span>' +
+        '<span class="amount ' + (r.net >= 0 ? "in" : "out") + '">' + tr("net") + ' ' + (r.net >= 0 ? "+" : "") + fmt(r.net) + '</span>' +
         '</div>';
     }).join("");
     elForecast.innerHTML = '<div class="entry-list">' + rows2 + '</div>';
-    elNote.textContent = "Based on your current 4 weeks, the next month projects roughly " +
-      fmt(t.in) + " in and " + fmt(t.out) + " out, for a net of " +
-      (t.net >= 0 ? "+" : "") + fmt(t.net) + ". " +
-      (t.net >= 0 ? "Cash trend is up." : "Cash trend is down — worth a closer look.");
+    elNote.textContent = I18N[lang].forecastNote(t, fmt, t.net >= 0);
 
     // Weekly cash flow chart (grouped bars: in vs out per week)
     var elChart = document.getElementById("chart");
@@ -487,7 +601,7 @@
       svg += '<rect class="bar-in" x="' + Math.round(cx - barW - barGap / 2) + '" y="' + (CH - PAD_B - hIn) + '" width="' + barW + '" height="' + hIn + '" rx="3"><title>In: ' + fmt(wt3.in) + '</title></rect>';
       svg += '<rect class="bar-out" x="' + Math.round(cx + barGap / 2) + '" y="' + (CH - PAD_B - hOut) + '" width="' + barW + '" height="' + hOut + '" rx="3"><title>Out: ' + fmt(wt3.out) + '</title></rect>';
       svg += '<text class="bar-value" x="' + cx + '" y="' + (CH - PAD_B - Math.max(hIn, hOut) - 5) + '" text-anchor="middle">' + (wt3.in > 0 || wt3.out > 0 ? "RM " + Math.round(Math.max(wt3.in, wt3.out)).toLocaleString() : "") + '</text>';
-      svg += '<text class="bar-label" x="' + cx + '" y="' + (CH - PAD_B + 14) + '" text-anchor="middle">W' + w3 + '</text>';
+      svg += '<text class="bar-label" x="' + cx + '" y="' + (CH - PAD_B + 14) + '" text-anchor="middle">' + tr("week").charAt(0) + w + '</text>';
     }
     svg += '</svg>';
     elChart.innerHTML = svg;
@@ -508,8 +622,8 @@
     var type = document.getElementById("type").value;
     var week = parseInt(document.getElementById("week").value, 10);
     msg.textContent = "";
-    if (!label) { msg.textContent = "Please give the entry a short name."; return; }
-    if (!(amount > 0)) { msg.textContent = "Please enter an amount above zero."; return; }
+    if (!label) { msg.textContent = tr("errLabel"); return; }
+    if (!(amount > 0)) { msg.textContent = tr("errAmount"); return; }
     entries.push({ id: nextId++, week: week, type: type, label: label, amount: amount });
     document.getElementById("label").value = "";
     document.getElementById("amount").value = "";
@@ -551,15 +665,26 @@
     document.getElementById("print-body").innerHTML = body;
     document.getElementById("print-foot").innerHTML =
       "<tr style='font-weight:bold; background:#f7f7f7;'>" +
-      '<td style="padding:8px; border:1px solid #ccc;">Next-month total</td>' +
+      '<td style="padding:8px; border:1px solid #ccc;">' + tr("printTotal") + "</td>" +
       '<td style="padding:8px; border:1px solid #ccc; text-align:right;">' + fmt(t.in) + "</td>" +
       '<td style="padding:8px; border:1px solid #ccc; text-align:right;">' + fmt(t.out) + "</td>" +
       '<td style="padding:8px; border:1px solid #ccc; text-align:right;">' + (t.net >= 0 ? "+" : "") + fmt(t.net) + "</td></tr>";
-    document.getElementById("print-generated").textContent =
-      "Generated " + new Date().toLocaleDateString("en-MY", { day: "numeric", month: "long", year: "numeric" }) +
-      " · Weekly Cash Flow View (sample data)";
+    var dateStr = new Date().toLocaleDateString(I18N[lang].locale, { day: "numeric", month: "long", year: "numeric" });
+    document.getElementById("print-generated").textContent = I18N[lang].printGenerated(dateStr);
     document.getElementById("print-note").textContent = elNote.textContent;
     window.print();
+  });
+
+  // ---- Language switcher ----
+  document.getElementById("lang-en").addEventListener("click", function () {
+    lang = "en";
+    applyStaticLang();
+    render();
+  });
+  document.getElementById("lang-bm").addEventListener("click", function () {
+    lang = "bm";
+    applyStaticLang();
+    render();
   });
 
   // Feature 3 (summary/forecast recalculation) is handled by render() on every change.
