@@ -156,6 +156,12 @@
   .form-msg { font-size: 0.82rem; color: var(--red); min-height: 1em; margin-top: 4px; }
 
   footer { text-align: center; color: var(--muted); font-size: 0.78rem; padding: 8px 0 24px; }
+
+  /* Print mode: show only the forecast sheet */
+  @media print {
+    body > header, body > section, body > footer { display: none !important; }
+    #print-sheet { display: block !important; font-family: Arial, sans-serif; color: #222; }
+  }
 </style>
 </head>
 <body>
@@ -227,7 +233,30 @@
   <p class="purpose">A simple look ahead for the next 4 weeks</p>
   <div id="forecast-cards"></div>
   <div class="forecast-note" id="forecast-note"></div>
+  <button type="button" id="export-pdf" style="margin-top:12px; width:100%; padding:10px; background:#2d3748; color:#fff; border:none; border-radius:8px; font-size:0.95rem; font-weight:600; cursor:pointer;">
+    Export Forecast to PDF
+  </button>
 </section>
+
+<!-- Printable forecast sheet (hidden on screen, shown only when printing) -->
+<div id="print-sheet" style="display:none;">
+  <img src="logo-tmg.webp" alt="TMG logo" style="height:44px; margin-bottom:12px;">
+  <h1 style="font-size:1.3rem;">Next-Month Forecast</h1>
+  <p id="print-generated" style="color:#555; font-size:0.85rem; margin-bottom:12px;"></p>
+  <table style="width:100%; border-collapse:collapse; font-size:0.9rem;" id="print-table">
+    <thead>
+      <tr style="background:#f0f0f0;">
+        <th style="text-align:left; padding:8px; border:1px solid #ccc;">Week</th>
+        <th style="text-align:right; padding:8px; border:1px solid #ccc;">Money In</th>
+        <th style="text-align:right; padding:8px; border:1px solid #ccc;">Money Out</th>
+        <th style="text-align:right; padding:8px; border:1px solid #ccc;">Net</th>
+      </tr>
+    </thead>
+    <tbody id="print-body"></tbody>
+    <tfoot id="print-foot"></tfoot>
+  </table>
+  <p id="print-note" style="margin-top:12px; font-size:0.85rem; color:#444;"></p>
+</div>
 
 <footer>Sample data only — nothing is saved between visits.</footer>
 
@@ -380,6 +409,32 @@
       b.classList.toggle("active", b === btn);
     });
     render();
+  });
+
+  // ---- Export next-month forecast to PDF (via browser print dialog) ----
+  document.getElementById("export-pdf").addEventListener("click", function () {
+    var rows = forecast(entries);
+    var t = overallTotals(entries);
+    var body = rows.map(function (r) {
+      return "<tr>" +
+        '<td style="padding:8px; border:1px solid #ccc;">' + r.week + "</td>" +
+        '<td style="padding:8px; border:1px solid #ccc; text-align:right;">' + fmt(r.in) + "</td>" +
+        '<td style="padding:8px; border:1px solid #ccc; text-align:right;">' + fmt(r.out) + "</td>" +
+        '<td style="padding:8px; border:1px solid #ccc; text-align:right;">' + (r.net >= 0 ? "+" : "") + fmt(r.net) + "</td>" +
+        "</tr>";
+    }).join("");
+    document.getElementById("print-body").innerHTML = body;
+    document.getElementById("print-foot").innerHTML =
+      "<tr style='font-weight:bold; background:#f7f7f7;'>" +
+      '<td style="padding:8px; border:1px solid #ccc;">Next-month total</td>' +
+      '<td style="padding:8px; border:1px solid #ccc; text-align:right;">' + fmt(t.in) + "</td>" +
+      '<td style="padding:8px; border:1px solid #ccc; text-align:right;">' + fmt(t.out) + "</td>" +
+      '<td style="padding:8px; border:1px solid #ccc; text-align:right;">' + (t.net >= 0 ? "+" : "") + fmt(t.net) + "</td></tr>";
+    document.getElementById("print-generated").textContent =
+      "Generated " + new Date().toLocaleDateString("en-MY", { day: "numeric", month: "long", year: "numeric" }) +
+      " · Weekly Cash Flow View (sample data)";
+    document.getElementById("print-note").textContent = elNote.textContent;
+    window.print();
   });
 
   // Feature 3 (summary/forecast recalculation) is handled by render() on every change.
