@@ -50,6 +50,7 @@
     -webkit-font-smoothing: antialiased;
   }
   header { text-align: center; padding: 8px 0 20px; position: relative; }
+  header .header-controls { position: static; justify-content: center; margin-bottom: 12px; }
   .header-controls {
     position: absolute;
     top: 0;
@@ -67,6 +68,30 @@
     gap: 2px;
     box-shadow: var(--shadow);
   }
+  .mode-bar {
+    display: flex;
+    justify-content: center;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+    box-shadow: var(--shadow);
+    width: fit-content;
+    margin: 0 auto 12px;
+  }
+  .mode-bar button {
+    padding: 6px 18px;
+    border: none;
+    background: transparent;
+    border-radius: 7px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .mode-bar button.active { background: var(--accent); color: #fff; }
   .theme-btn {
     width: 34px;
     height: 30px;
@@ -314,6 +339,10 @@
 <body>
 
 <header>
+  <div class="mode-bar" role="group" aria-label="Mode">
+    <button type="button" id="mode-personal" class="active" data-i18n="modePersonal">Personal</button>
+    <button type="button" id="mode-company" data-i18n="modeCompany">Company</button>
+  </div>
   <div class="header-controls">
     <div class="lang-bar" role="group" aria-label="Language">
       <button type="button" id="lang-en" class="active">EN</button>
@@ -427,13 +456,31 @@
   "use strict";
 
   // ---- Sample seed data (Malaysia-specific, made up) ----
-  var entries = [
-    { id: 1, week: 1, type: "in",  label: "Salary – Pahang workshop",      amount: 2450 },
-    { id: 2, week: 1, type: "out", label: "Groceries at Mydin Kuantan",    amount: 180.5 },
-    { id: 3, week: 2, type: "out", label: "Touch 'n Go fuel top-up",       amount: 120 },
-    { id: 4, week: 2, type: "in",  label: "Freelance side job",            amount: 650 }
-  ];
-  var nextId = 5;
+  // Two independent datasets: personal and company cash flow
+  var datasets = {
+    personal: {
+      entries: [
+        { id: 1, week: 1, type: "in",  label: "Salary – Pahang workshop",      amount: 2450 },
+        { id: 2, week: 1, type: "out", label: "Groceries at Mydin Kuantan",    amount: 180.5 },
+        { id: 3, week: 2, type: "out", label: "Touch 'n Go fuel top-up",       amount: 120 },
+        { id: 4, week: 2, type: "in",  label: "Freelance side job",            amount: 650 }
+      ],
+      nextId: 5
+    },
+    company: {
+      entries: [
+        { id: 101, week: 1, type: "in",  label: "Client payment – Servis kereta",  amount: 8200 },
+        { id: 102, week: 1, type: "out", label: "Sewa bengkal Kuantan",            amount: 1800 },
+        { id: 103, week: 1, type: "out", label: "Gaji mekanik (3 orang)",          amount: 4200 },
+        { id: 104, week: 2, type: "in",  label: "Jualan bahagian spare part",      amount: 3150 },
+        { id: 105, week: 2, type: "out", label: "Marketing Facebook Ads",          amount: 450 },
+        { id: 106, week: 3, type: "in",  label: "Kontrak fleet TMG – maintenance", amount: 5600 }
+      ],
+      nextId: 107
+    }
+  };
+  var mode = "personal";
+  var entries = datasets.personal.entries;
   var filter = "all";
   var lang = "en";
 
@@ -461,6 +508,8 @@
       forecastPurpose: "A simple look ahead for the next 4 weeks",
       exportPdf: "Export Forecast to PDF",
       footerNote: "Sample data only — nothing is saved between visits.",
+      modePersonal: "Personal", modeCompany: "Company",
+      modePersonalTag: "Personal mode", modeCompanyTag: "Company mode",
       removeEntry: "Remove entry",
       forecastNote: function (t, fmt, pos) {
         return "Based on your current 4 weeks, the next month projects roughly " +
@@ -496,6 +545,8 @@
       forecastPurpose: "Pandangan mudah untuk 4 minggu hadapan",
       exportPdf: "Eksport Unjuran ke PDF",
       footerNote: "Data contoh sahaja — tiada apa-apa disimpan antara lawatan.",
+      modePersonal: "Peribadi", modeCompany: "Syarikat",
+      modePersonalTag: "Mod peribadi", modeCompanyTag: "Mod syarikat",
       removeEntry: "Buang catatan",
       forecastNote: function (t, fmt, pos) {
         return "Berdasarkan 4 minggu semasa anda, bulan hadapan diunjur lebih kurang " +
@@ -662,7 +713,8 @@
     msg.textContent = "";
     if (!label) { msg.textContent = tr("errLabel"); return; }
     if (!(amount > 0)) { msg.textContent = tr("errAmount"); return; }
-    entries.push({ id: nextId++, week: week, type: type, label: label, amount: amount });
+    var ds = datasets[mode];
+    entries.push({ id: ds.nextId++, week: week, type: type, label: label, amount: amount });
     document.getElementById("label").value = "";
     document.getElementById("amount").value = "";
     render();
@@ -738,6 +790,19 @@
     setTheme(cur === "dark" ? "light" : "dark");
   });
   setTheme("light");
+
+  // ---- Personal / Company mode switcher (independent datasets) ----
+  function setMode(m) {
+    mode = m;
+    entries = datasets[m].entries;
+    document.getElementById("mode-personal").classList.toggle("active", m === "personal");
+    document.getElementById("mode-company").classList.toggle("active", m === "company");
+    document.getElementById("mode-personal").setAttribute("aria-pressed", m === "personal");
+    document.getElementById("mode-company").setAttribute("aria-pressed", m === "company");
+    render();
+  }
+  document.getElementById("mode-personal").addEventListener("click", function () { setMode("personal"); });
+  document.getElementById("mode-company").addEventListener("click", function () { setMode("company"); });
 
   // Feature 3 (summary/forecast recalculation) is handled by render() on every change.
   render();
