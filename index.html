@@ -196,6 +196,38 @@
   form button[type="submit"]:active { transform: scale(0.98); }
   .form-msg { font-size: 0.82rem; color: var(--red); min-height: 1em; margin-top: 4px; }
 
+  /* Cash flow chart */
+  .chart-wrap {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+  }
+  .chart-legend {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 8px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .chart-legend .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    margin-right: 5px;
+    vertical-align: -1px;
+  }
+  .dot-in { background: var(--green); }
+  .dot-out { background: var(--red); }
+  #chart svg { width: 100%; height: auto; display: block; }
+  .bar-in { fill: var(--green); }
+  .bar-out { fill: var(--red); }
+  .bar-label { font-size: 10px; fill: var(--muted); font-weight: 600; }
+  .bar-value { font-size: 9px; fill: var(--ink); font-weight: 600; }
+  .chart-axis { stroke: var(--line); stroke-width: 1; }
+
   #export-pdf {
     margin-top: 12px;
     width: 100%;
@@ -261,6 +293,14 @@
   </div>
 
   <div id="week-cards"></div>
+
+  <div class="chart-wrap">
+    <div class="chart-legend">
+      <span><span class="dot dot-in"></span>Money In</span>
+      <span><span class="dot dot-out"></span>Money Out</span>
+    </div>
+    <div id="chart" aria-label="Weekly cash flow chart" role="img"></div>
+  </div>
 
   <form id="entry-form" novalidate>
     <div class="row">
@@ -424,6 +464,33 @@
       fmt(t.in) + " in and " + fmt(t.out) + " out, for a net of " +
       (t.net >= 0 ? "+" : "") + fmt(t.net) + ". " +
       (t.net >= 0 ? "Cash trend is up." : "Cash trend is down — worth a closer look.");
+
+    // Weekly cash flow chart (grouped bars: in vs out per week)
+    var elChart = document.getElementById("chart");
+    var maxVal = 0;
+    for (var w2 = 1; w2 <= 4; w2++) {
+      var wt2 = weekTotals(entries, w2);
+      maxVal = Math.max(maxVal, wt2.in, wt2.out);
+    }
+    if (maxVal === 0) maxVal = 1;
+    var CW = 360, CH = 150, PAD_L = 8, PAD_B = 22, PAD_T = 16;
+    var plotH = CH - PAD_B - PAD_T;
+    var groupW = (CW - PAD_L * 2) / 4;
+    var barW = 26, barGap = 6;
+    var svg = '<svg viewBox="0 0 ' + CW + ' ' + CH + '" xmlns="http://www.w3.org/2000/svg">';
+    svg += '<line class="chart-axis" x1="' + PAD_L + '" y1="' + (CH - PAD_B) + '" x2="' + (CW - PAD_L) + '" y2="' + (CH - PAD_B) + '"/>';
+    for (var w3 = 1; w3 <= 4; w3++) {
+      var wt3 = weekTotals(entries, w3);
+      var cx = PAD_L + groupW * (w3 - 1) + groupW / 2;
+      var hIn = Math.round(wt3.in / maxVal * plotH);
+      var hOut = Math.round(wt3.out / maxVal * plotH);
+      svg += '<rect class="bar-in" x="' + Math.round(cx - barW - barGap / 2) + '" y="' + (CH - PAD_B - hIn) + '" width="' + barW + '" height="' + hIn + '" rx="3"><title>In: ' + fmt(wt3.in) + '</title></rect>';
+      svg += '<rect class="bar-out" x="' + Math.round(cx + barGap / 2) + '" y="' + (CH - PAD_B - hOut) + '" width="' + barW + '" height="' + hOut + '" rx="3"><title>Out: ' + fmt(wt3.out) + '</title></rect>';
+      svg += '<text class="bar-value" x="' + cx + '" y="' + (CH - PAD_B - Math.max(hIn, hOut) - 5) + '" text-anchor="middle">' + (wt3.in > 0 || wt3.out > 0 ? "RM " + Math.round(Math.max(wt3.in, wt3.out)).toLocaleString() : "") + '</text>';
+      svg += '<text class="bar-label" x="' + cx + '" y="' + (CH - PAD_B + 14) + '" text-anchor="middle">W' + w3 + '</text>';
+    }
+    svg += '</svg>';
+    elChart.innerHTML = svg;
   }
 
   function esc(s) {
