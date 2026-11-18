@@ -6,16 +6,20 @@
 <title>Weekly Cash Flow View</title>
 <style>
   :root {
-    --bg: #f6f8fa;
+    --bg: #f4f6f8;
     --card: #ffffff;
-    --ink: #2d3748;
-    --muted: #718096;
-    --green: #2f855a;
-    --green-bg: #f0fff4;
-    --red: #c53030;
-    --red-bg: #fff5f5;
-    --line: #e2e8f0;
-    --accent: #4a7fb5;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --green: #15803d;
+    --green-soft: #dcfce7;
+    --red: #b91c1c;
+    --red-soft: #fee2e2;
+    --line: #e5e7eb;
+    --accent: #2563eb;
+    --accent-soft: #eff6ff;
+    --shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+    --shadow-lift: 0 4px 12px rgba(16, 24, 40, 0.10);
+    --radius: 14px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -26,66 +30,88 @@
     padding: 16px;
     max-width: 720px;
     margin: 0 auto;
+    -webkit-font-smoothing: antialiased;
   }
-  header { text-align: center; padding: 8px 0 16px; }
-  header h1 { font-size: 1.5rem; font-weight: 600; }
+  header { text-align: center; padding: 8px 0 20px; }
+  header img { height: 52px; display: block; margin: 0 auto 10px; }
+  header h1 { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.02em; }
   header p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
 
   section {
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: var(--radius);
+    padding: 20px 16px;
     margin-bottom: 20px;
+    box-shadow: var(--shadow);
   }
-  h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; }
-  .purpose { color: var(--muted); font-size: 0.85rem; margin-bottom: 12px; }
+  h2 { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2px; }
+  .purpose { color: var(--muted); font-size: 0.84rem; margin-bottom: 14px; }
 
   .totals-row { display: flex; gap: 10px; flex-wrap: wrap; }
   .totals-row > div {
     flex: 1 1 120px;
     background: var(--bg);
-    border-radius: 10px;
-    padding: 12px;
+    border-radius: 12px;
+    padding: 14px 12px;
     text-align: center;
+    transition: transform 0.15s ease;
   }
-  .totals-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  .totals-value { font-size: 1.2rem; font-weight: 700; margin-top: 4px; }
+  .totals-row > div:hover { transform: translateY(-2px); }
+  .totals-row > div.net-cell { background: var(--accent-soft); }
+  .totals-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
+  .totals-value { font-size: 1.35rem; font-weight: 700; margin-top: 4px; letter-spacing: -0.02em; }
   .up { color: var(--green); }
   .down { color: var(--red); }
 
-  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-  .filter-bar button {
-    padding: 6px 14px;
-    border: 1px solid var(--line);
+  /* Segmented filter control */
+  .filter-bar {
+    display: flex;
     background: var(--bg);
-    border-radius: 999px;
-    font-size: 0.85rem;
-    color: var(--ink);
-    cursor: pointer;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+    margin-bottom: 14px;
   }
-  .filter-bar button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .filter-bar button {
+    flex: 1;
+    padding: 7px 10px;
+    border: none;
+    background: transparent;
+    border-radius: 7px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .filter-bar button.active { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
 
   .week-card {
     background: var(--bg);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
   }
-  .week-title { font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
+  .week-title { font-weight: 700; margin-bottom: 10px; font-size: 0.92rem; display: flex; justify-content: space-between; align-items: center; }
+  .week-net-badge { font-size: 0.8rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; }
+  .week-net-badge.pos { background: var(--green-soft); color: var(--green); }
+  .week-net-badge.neg { background: var(--red-soft); color: var(--red); }
   .week-nums { display: flex; gap: 8px; flex-wrap: wrap; }
   .week-nums span {
     flex: 1 1 90px;
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 6px 8px;
-    font-size: 0.85rem;
+    border-radius: 10px;
+    padding: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
     text-align: center;
   }
-  .num-label { color: var(--muted); font-size: 0.72rem; display: block; }
+  .num-label { color: var(--muted); font-size: 0.7rem; display: block; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
 
-  .entry-list { margin-top: 6px; }
+  .entry-list { margin-top: 8px; }
   .entry {
     display: flex;
     align-items: center;
@@ -93,20 +119,23 @@
     gap: 8px;
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 8px 10px;
-    margin-top: 6px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 8px;
     font-size: 0.88rem;
+    transition: box-shadow 0.15s ease;
   }
+  .entry:hover { box-shadow: var(--shadow-lift); }
   .entry .tag {
-    font-size: 0.7rem;
-    padding: 2px 8px;
+    font-size: 0.68rem;
+    padding: 3px 9px;
     border-radius: 999px;
-    font-weight: 600;
+    font-weight: 700;
+    flex-shrink: 0;
   }
-  .tag.in { background: var(--green-bg); color: var(--green); }
-  .tag.out { background: var(--red-bg); color: var(--red); }
-  .entry .amount { font-weight: 600; white-space: nowrap; }
+  .tag.in { background: var(--green-soft); color: var(--green); }
+  .tag.out { background: var(--red-soft); color: var(--red); }
+  .entry .amount { font-weight: 700; white-space: nowrap; }
   .entry .amount.in { color: var(--green); }
   .entry .amount.out { color: var(--red); }
   .entry .remove {
@@ -116,44 +145,72 @@
     cursor: pointer;
     font-size: 1rem;
     padding: 2px 6px;
+    border-radius: 6px;
+    flex-shrink: 0;
   }
-  .entry .remove:hover { color: var(--red); }
+  .entry .remove:hover { color: var(--red); background: var(--red-soft); }
   .empty-note { color: var(--muted); font-size: 0.85rem; padding: 8px 0; font-style: italic; }
 
   .forecast-note {
-    background: var(--bg);
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
     border-radius: 10px;
-    padding: 10px 12px;
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-top: 10px;
+    padding: 12px 14px;
+    font-size: 0.86rem;
+    color: #1e3a8a;
+    margin-top: 12px;
   }
 
+  form { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); }
   form .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
   form input, form select {
-    padding: 8px 10px;
+    padding: 10px 12px;
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 0.9rem;
-    background: var(--bg);
+    background: var(--card);
     color: var(--ink);
     flex: 1 1 120px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  form input:focus, form select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
   }
   form input[type="number"] { flex: 1 1 100px; }
   form button[type="submit"] {
     flex: 1 1 100%;
-    padding: 10px;
+    padding: 12px;
     background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     margin-top: 4px;
+    transition: filter 0.15s ease, transform 0.1s ease;
   }
-  form button[type="submit"]:hover { filter: brightness(1.05); }
+  form button[type="submit"]:hover { filter: brightness(1.08); }
+  form button[type="submit"]:active { transform: scale(0.98); }
   .form-msg { font-size: 0.82rem; color: var(--red); min-height: 1em; margin-top: 4px; }
+
+  #export-pdf {
+    margin-top: 12px;
+    width: 100%;
+    padding: 12px;
+    background: #1f2937;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+  #export-pdf:hover { filter: brightness(1.15); }
+  #export-pdf:active { transform: scale(0.98); }
 
   footer { text-align: center; color: var(--muted); font-size: 0.78rem; padding: 8px 0 24px; }
 
@@ -167,7 +224,7 @@
 <body>
 
 <header>
-  <img src="logo-tmg.webp" alt="TMG Group logo" style="height:56px; display:block; margin:0 auto 8px;">
+  <img src="logo-tmg.webp" alt="TMG Group logo">
   <h1>Weekly Cash Flow View</h1>
   <p>A simple weekly money view with a one-month forecast</p>
 </header>
@@ -185,7 +242,7 @@
       <span class="totals-label">Total Out</span>
       <div class="totals-value down" id="total-out">RM 0.00</div>
     </div>
-    <div>
+    <div class="net-cell">
       <span class="totals-label">Net</span>
       <div class="totals-value" id="total-net">RM 0.00</div>
     </div>
@@ -343,7 +400,8 @@
         rows = '<div class="empty-note">No matching entries this week.</div>';
       }
       html += '<div class="week-card">' +
-        '<div class="week-title">Week ' + w + '</div>' +
+        '<div class="week-title"><span>Week ' + w + '</span>' +
+        '<span class="week-net-badge ' + (wt.net >= 0 ? "pos" : "neg") + '">' + (wt.net >= 0 ? "+" : "") + fmt(wt.net) + '</span></div>' +
         '<div class="week-nums">' +
         '<span><span class="num-label">In</span>' + fmt(wt.in) + '</span>' +
         '<span><span class="num-label">Out</span>' + fmt(wt.out) + '</span>' +
