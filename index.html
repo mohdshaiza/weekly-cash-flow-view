@@ -17,9 +17,26 @@
     --line: #e5e7eb;
     --accent: #2563eb;
     --accent-soft: #eff6ff;
+    --note-ink: #1e3a8a;
     --shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
     --shadow-lift: 0 4px 12px rgba(16, 24, 40, 0.10);
     --radius: 14px;
+  }
+  html[data-theme="dark"] {
+    --bg: #111827;
+    --card: #1f2937;
+    --ink: #f3f4f6;
+    --muted: #9ca3af;
+    --green: #4ade80;
+    --green-soft: #14532d;
+    --red: #f87171;
+    --red-soft: #7f1d1d;
+    --line: #374151;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a5f;
+    --note-ink: #bfdbfe;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-lift: 0 4px 12px rgba(0, 0, 0, 0.5);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -33,10 +50,15 @@
     -webkit-font-smoothing: antialiased;
   }
   header { text-align: center; padding: 8px 0 20px; position: relative; }
-  .lang-bar {
+  .header-controls {
     position: absolute;
     top: 0;
     right: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .lang-bar {
     display: flex;
     background: var(--card);
     border: 1px solid var(--line);
@@ -45,6 +67,19 @@
     gap: 2px;
     box-shadow: var(--shadow);
   }
+  .theme-btn {
+    width: 34px;
+    height: 30px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+    box-shadow: var(--shadow);
+    transition: background 0.15s ease;
+  }
+  .theme-btn:hover { background: var(--accent-soft); }
   .lang-bar button {
     padding: 4px 10px;
     border: none;
@@ -180,7 +215,7 @@
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 0.86rem;
-    color: #1e3a8a;
+    color: var(--note-ink);
     margin-top: 12px;
   }
 
@@ -255,7 +290,7 @@
     margin-top: 12px;
     width: 100%;
     padding: 12px;
-    background: #1f2937;
+    background: var(--accent);
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -279,9 +314,12 @@
 <body>
 
 <header>
-  <div class="lang-bar" role="group" aria-label="Language">
-    <button type="button" id="lang-en" class="active">EN</button>
-    <button type="button" id="lang-bm">BM</button>
+  <div class="header-controls">
+    <div class="lang-bar" role="group" aria-label="Language">
+      <button type="button" id="lang-en" class="active">EN</button>
+      <button type="button" id="lang-bm">BM</button>
+    </div>
+    <button type="button" id="theme-toggle" class="theme-btn" data-title-light="Switch to dark mode" data-title-dark="Switch to light mode" aria-label="Toggle dark mode">🌙</button>
   </div>
   <img src="logo-tmg.webp" alt="TMG Group logo">
   <h1 data-i18n="appTitle">Weekly Cash Flow View</h1>
@@ -686,6 +724,20 @@
     applyStaticLang();
     render();
   });
+
+  // ---- Light / dark mode toggle (session-only, nothing persisted) ----
+  var themeBtn = document.getElementById("theme-toggle");
+  function setTheme(mode) {
+    document.documentElement.setAttribute("data-theme", mode);
+    themeBtn.textContent = mode === "dark" ? "☀️" : "🌙";
+    themeBtn.setAttribute("aria-label",
+      mode === "dark" ? themeBtn.getAttribute("data-title-dark") : themeBtn.getAttribute("data-title-light"));
+  }
+  themeBtn.addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    setTheme(cur === "dark" ? "light" : "dark");
+  });
+  setTheme("light");
 
   // Feature 3 (summary/forecast recalculation) is handled by render() on every change.
   render();
