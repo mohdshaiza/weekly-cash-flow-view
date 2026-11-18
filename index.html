@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Cash Flow View</title>
+<style>
+  :root {
+    --bg: #f6f8fa;
+    --card: #ffffff;
+    --ink: #2d3748;
+    --muted: #718096;
+    --green: #2f855a;
+    --green-bg: #f0fff4;
+    --red: #c53030;
+    --red-bg: #fff5f5;
+    --line: #e2e8f0;
+    --accent: #4a7fb5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    padding: 16px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  header { text-align: center; padding: 8px 0 16px; }
+  header h1 { font-size: 1.5rem; font-weight: 600; }
+  header p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; }
+  .purpose { color: var(--muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+  .totals-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .totals-row > div {
+    flex: 1 1 120px;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .totals-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .totals-value { font-size: 1.2rem; font-weight: 700; margin-top: 4px; }
+  .up { color: var(--green); }
+  .down { color: var(--red); }
+
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .filter-bar button {
+    padding: 6px 14px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .filter-bar button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .week-card {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .week-title { font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
+  .week-nums { display: flex; gap: 8px; flex-wrap: wrap; }
+  .week-nums span {
+    flex: 1 1 90px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+  .num-label { color: var(--muted); font-size: 0.72rem; display: block; }
+
+  .entry-list { margin-top: 6px; }
+  .entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-top: 6px;
+    font-size: 0.88rem;
+  }
+  .entry .tag {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.in { background: var(--green-bg); color: var(--green); }
+  .tag.out { background: var(--red-bg); color: var(--red); }
+  .entry .amount { font-weight: 600; white-space: nowrap; }
+  .entry .amount.in { color: var(--green); }
+  .entry .amount.out { color: var(--red); }
+  .entry .remove {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 2px 6px;
+  }
+  .entry .remove:hover { color: var(--red); }
+  .empty-note { color: var(--muted); font-size: 0.85rem; padding: 8px 0; font-style: italic; }
+
+  .forecast-note {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  form .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  form input, form select {
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--bg);
+    color: var(--ink);
+    flex: 1 1 120px;
+  }
+  form input[type="number"] { flex: 1 1 100px; }
+  form button[type="submit"] {
+    flex: 1 1 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  form button[type="submit"]:hover { filter: brightness(1.05); }
+  .form-msg { font-size: 0.82rem; color: var(--red); min-height: 1em; margin-top: 4px; }
+
+  footer { text-align: center; color: var(--muted); font-size: 0.78rem; padding: 8px 0 24px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Weekly Cash Flow View</h1>
+  <p>A simple weekly money view with a one-month forecast</p>
+</header>
+
+<!-- Section 3: Quick totals (placed first so the big picture is up top) -->
+<section id="totals-section" aria-label="Quick totals">
+  <h2>Quick Totals</h2>
+  <p class="purpose">The current overall picture — is cash up or down?</p>
+  <div class="totals-row">
+    <div>
+      <span class="totals-label">Total In</span>
+      <div class="totals-value up" id="total-in">RM 0.00</div>
+    </div>
+    <div>
+      <span class="totals-label">Total Out</span>
+      <div class="totals-value down" id="total-out">RM 0.00</div>
+    </div>
+    <div>
+      <span class="totals-label">Net</span>
+      <div class="totals-value" id="total-net">RM 0.00</div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 1: Weekly cash flow -->
+<section id="weekly-section" aria-label="Weekly cash flow">
+  <h2>Weekly Cash Flow</h2>
+  <p class="purpose">Money in and money out for each week, at a glance</p>
+
+  <div class="filter-bar" role="group" aria-label="Filter view">
+    <button data-filter="all" class="active">All</button>
+    <button data-filter="in">Money In</button>
+    <button data-filter="out">Money Out</button>
+  </div>
+
+  <div id="week-cards"></div>
+
+  <form id="entry-form" novalidate>
+    <div class="row">
+      <select id="type">
+        <option value="in">Money In</option>
+        <option value="out">Money Out</option>
+      </select>
+      <select id="week">
+        <option value="1">Week 1</option>
+        <option value="2">Week 2</option>
+        <option value="3">Week 3</option>
+        <option value="4">Week 4</option>
+      </select>
+    </div>
+    <div class="row">
+      <input type="text" id="label" placeholder="What is it? e.g. Salary, Groceries" maxlength="40">
+      <input type="number" id="amount" placeholder="Amount (RM)" min="0.01" step="0.01">
+    </div>
+    <button type="submit">Add Entry</button>
+    <div class="form-msg" id="form-msg"></div>
+  </form>
+</section>
+
+<!-- Section 2: Next-month forecast -->
+<section id="forecast-section" aria-label="Next-month forecast">
+  <h2>Next-Month Forecast</h2>
+  <p class="purpose">A simple look ahead for the next 4 weeks</p>
+  <div id="forecast-cards"></div>
+  <div class="forecast-note" id="forecast-note"></div>
+</section>
+
+<footer>Sample data only — nothing is saved between visits.</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- Sample seed data (Malaysia-specific, made up) ----
+  var entries = [
+    { id: 1, week: 1, type: "in",  label: "Salary – Pahang workshop",      amount: 2450 },
+    { id: 2, week: 1, type: "out", label: "Groceries at Mydin Kuantan",    amount: 180.5 },
+    { id: 3, week: 2, type: "out", label: "Touch 'n Go fuel top-up",       amount: 120 },
+    { id: 4, week: 2, type: "in",  label: "Freelance side job",            amount: 650 }
+  ];
+  var nextId = 5;
+  var filter = "all";
+
+  var fmt = function (n) {
+    return "RM " + n.toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  // ---- Derived numbers ----
+  function weekTotals(list, w) {
+    var inn = 0, out = 0;
+    list.forEach(function (e) {
+      if (e.week === w) {
+        if (e.type === "in") inn += e.amount; else out += e.amount;
+      }
+    });
+    return { in: inn, out: out, net: inn - out };
+  }
+
+  function overallTotals(list) {
+    var inn = 0, out = 0;
+    list.forEach(function (e) {
+      if (e.type === "in") inn += e.amount; else out += e.amount;
+    });
+    return { in: inn, out: out, net: inn - out };
+  }
+
+  // Forecast for next 4 weeks: repeat each week's average income/outflow
+  function forecast(list) {
+    var t = overallTotals(list);
+    var avgIn = t.in / 4, avgOut = t.out / 4;
+    var rows = [];
+    for (var i = 1; i <= 4; i++) {
+      rows.push({ week: "Week " + i, in: avgIn, out: avgOut, net: avgIn - avgOut });
+    }
+    return rows;
+  }
+
+  // ---- Rendering (immediate, on screen) ----
+  var elTotalIn = document.getElementById("total-in");
+  var elTotalOut = document.getElementById("total-out");
+  var elTotalNet = document.getElementById("total-net");
+  var elWeekCards = document.getElementById("week-cards");
+  var elForecast = document.getElementById("forecast-cards");
+  var elNote = document.getElementById("forecast-note");
+
+  function render() {
+    var t = overallTotals(entries);
+    elTotalIn.textContent = fmt(t.in);
+    elTotalOut.textContent = fmt(t.out);
+    elTotalNet.textContent = (t.net >= 0 ? "+" : "") + fmt(t.net);
+    elTotalNet.classList.toggle("up", t.net >= 0);
+    elTotalNet.classList.toggle("down", t.net < 0);
+
+    // Week cards 1–4 with visible entries, filtered
+    var html = "";
+    for (var w = 1; w <= 4; w++) {
+      var wt = weekTotals(entries, w);
+      var visible = entries.filter(function (e) {
+        return e.week === w && (filter === "all" || e.type === filter);
+      });
+      var rows = visible.map(function (e) {
+        return '<div class="entry">' +
+          '<span class="tag ' + e.type + '">' + (e.type === "in" ? "In" : "Out") + '</span>' +
+          '<span style="flex:1">' + esc(e.label) + '</span>' +
+          '<span class="amount ' + e.type + '">' + (e.type === "in" ? "+" : "−") + " " + fmt(e.amount) + '</span>' +
+          '<button class="remove" data-del="' + e.id + '" aria-label="Remove entry">✕</button>' +
+          '</div>';
+      }).join("");
+      if (!rows) {
+        rows = '<div class="empty-note">No matching entries this week.</div>';
+      }
+      html += '<div class="week-card">' +
+        '<div class="week-title">Week ' + w + '</div>' +
+        '<div class="week-nums">' +
+        '<span><span class="num-label">In</span>' + fmt(wt.in) + '</span>' +
+        '<span><span class="num-label">Out</span>' + fmt(wt.out) + '</span>' +
+        '<span><span class="num-label">Net</span>' + (wt.net >= 0 ? "+" : "") + fmt(wt.net) + '</span>' +
+        '</div><div class="entry-list">' + rows + '</div></div>';
+    }
+    elWeekCards.innerHTML = html;
+
+    // Forecast rows
+    var rows2 = forecast(entries).map(function (r) {
+      return '<div class="entry">' +
+        '<span style="flex:1;font-weight:600">' + r.week + '</span>' +
+        '<span class="amount in">In ' + fmt(r.in) + '</span>' +
+        '<span class="amount out">Out ' + fmt(r.out) + '</span>' +
+        '<span class="amount ' + (r.net >= 0 ? "in" : "out") + '">Net ' + (r.net >= 0 ? "+" : "") + fmt(r.net) + '</span>' +
+        '</div>';
+    }).join("");
+    elForecast.innerHTML = '<div class="entry-list">' + rows2 + '</div>';
+    elNote.textContent = "Based on your current 4 weeks, the next month projects roughly " +
+      fmt(t.in) + " in and " + fmt(t.out) + " out, for a net of " +
+      (t.net >= 0 ? "+" : "") + fmt(t.net) + ". " +
+      (t.net >= 0 ? "Cash trend is up." : "Cash trend is down — worth a closer look.");
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // ---- Feature 1: Add entry ----
+  document.getElementById("entry-form").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var msg = document.getElementById("form-msg");
+    var label = document.getElementById("label").value.trim();
+    var amount = parseFloat(document.getElementById("amount").value);
+    var type = document.getElementById("type").value;
+    var week = parseInt(document.getElementById("week").value, 10);
+    msg.textContent = "";
+    if (!label) { msg.textContent = "Please give the entry a short name."; return; }
+    if (!(amount > 0)) { msg.textContent = "Please enter an amount above zero."; return; }
+    entries.push({ id: nextId++, week: week, type: type, label: label, amount: amount });
+    document.getElementById("label").value = "";
+    document.getElementById("amount").value = "";
+    render();
+  });
+
+  // Remove entry (delegated)
+  elWeekCards.addEventListener("click", function (ev) {
+    var btn = ev.target.closest("[data-del]");
+    if (!btn) return;
+    var id = parseInt(btn.getAttribute("data-del"), 10);
+    entries = entries.filter(function (e) { return e.id !== id; });
+    render();
+  });
+
+  // ---- Feature 2: Filter view ----
+  document.querySelector(".filter-bar").addEventListener("click", function (ev) {
+    var btn = ev.target.closest("button[data-filter]");
+    if (!btn) return;
+    filter = btn.getAttribute("data-filter");
+    document.querySelectorAll(".filter-bar button").forEach(function (b) {
+      b.classList.toggle("active", b === btn);
+    });
+    render();
+  });
+
+  // Feature 3 (summary/forecast recalculation) is handled by render() on every change.
+  render();
+})();
+</script>
+</body>
+</html>
